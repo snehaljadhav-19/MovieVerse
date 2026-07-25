@@ -4,7 +4,7 @@ from utils.tmdb import (
     get_movie_details,
     get_trailer,
     get_similar_movies,
-    get_cast_and_director
+    get_cast_and_director,
 )
 
 # ==========================================================
@@ -14,7 +14,7 @@ from utils.tmdb import (
 st.set_page_config(
     page_title="🎬 Movie Details",
     page_icon="🎬",
-    layout="wide"
+    layout="wide",
 )
 
 # ==========================================================
@@ -22,24 +22,19 @@ st.set_page_config(
 # ==========================================================
 
 try:
-    with open("css/style.css") as css:
-        st.markdown(
-            f"<style>{css.read()}</style>",
-            unsafe_allow_html=True
-        )
-except:
+    with open("css/style.css") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+except Exception:
     pass
 
 # ==========================================================
-# CHECK SESSION
+# SESSION CHECK
 # ==========================================================
 
 if "selected_movie_id" not in st.session_state:
-
-    st.warning("No movie selected.")
+    st.warning("Please select a movie first.")
 
     if st.button("⬅ Back Home"):
-
         st.switch_page("app.py")
 
     st.stop()
@@ -48,12 +43,10 @@ movie_id = st.session_state.selected_movie_id
 
 movie = get_movie_details(movie_id)
 
-if movie is None:
-
-    st.error("Movie details not found.")
+if not movie:
+    st.error("Movie details could not be loaded.")
 
     if st.button("⬅ Back Home"):
-
         st.switch_page("app.py")
 
     st.stop()
@@ -62,46 +55,43 @@ if movie is None:
 # BACK BUTTON
 # ==========================================================
 
-if st.button(
-    "⬅ Back to Recommendations",
-    width="stretch"
-):
-
+if st.button("⬅ Back to Recommendations"):
     st.switch_page("app.py")
 
 # ==========================================================
-# HERO BANNER
+# HERO BACKDROP
 # ==========================================================
 
 backdrop = movie.get("backdrop_path")
 
 if backdrop:
-
     st.image(
         f"https://image.tmdb.org/t/p/original{backdrop}",
-        width="stretch"
+        width="stretch",
     )
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ==========================================================
-# MAIN DETAILS
+# MAIN LAYOUT
 # ==========================================================
 
-left, right = st.columns([1, 2])
+poster_col, details_col = st.columns([1, 2])
 
-with left:
+with poster_col:
 
     poster = movie.get("poster_path")
 
     if poster:
-
         st.image(
             f"https://image.tmdb.org/t/p/w500{poster}",
-            width="stretch"
+            width="stretch",
         )
+with details_col:
 
-with right:
+    # ==========================================================
+    # TITLE
+    # ==========================================================
 
     st.title(movie.get("title", "Unknown Movie"))
 
@@ -109,6 +99,8 @@ with right:
 
     if tagline:
         st.caption(tagline)
+
+    st.markdown("### 📝 Overview")
 
     st.write(
         movie.get(
@@ -119,13 +111,16 @@ with right:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
+    # ==========================================================
+    # MOVIE STATS
+    # ==========================================================
+
     c1, c2, c3 = st.columns(3)
 
     with c1:
-
         st.metric(
             "⭐ Rating",
-            f"{movie.get('vote_average',0):.1f}"
+            f"{movie.get('vote_average', 0):.1f}"
         )
 
     with c2:
@@ -135,29 +130,33 @@ with right:
             "N/A"
         )
 
-        if release:
-            release = release[:4]
+        year = release[:4] if release else "N/A"
 
         st.metric(
             "📅 Year",
-            release
+            year
         )
 
     with c3:
 
         runtime = movie.get("runtime")
 
-        if runtime:
-            runtime = f"{runtime} min"
-        else:
-            runtime = "N/A"
+        runtime_text = (
+            f"{runtime} min"
+            if runtime
+            else "N/A"
+        )
 
         st.metric(
             "⏱ Runtime",
-            runtime
+            runtime_text
         )
 
-    # --------------------------------------------
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ==========================================================
+    # GENRES
+    # ==========================================================
 
     genres = movie.get("genres", [])
 
@@ -175,11 +174,12 @@ with right:
                     f"""
 <div style="
 background:#E50914;
-padding:8px;
-border-radius:20px;
+padding:10px;
+border-radius:25px;
 text-align:center;
 font-weight:bold;
 color:white;
+margin-bottom:10px;
 ">
 {genre['name']}
 </div>
@@ -187,16 +187,22 @@ color:white;
                     unsafe_allow_html=True
                 )
 
-    # --------------------------------------------
+    # ==========================================================
+    # LANGUAGE
+    # ==========================================================
 
-    st.markdown("### 🌍 Language")
+    st.markdown("### 🌍 Original Language")
 
-    st.write(
+    st.success(
         movie.get(
             "original_language",
             "N/A"
         ).upper()
     )
+
+    # ==========================================================
+    # DIRECTOR
+    # ==========================================================
 
     credits = get_cast_and_director(movie["id"])
 
@@ -205,34 +211,87 @@ color:white;
         st.markdown("### 🎬 Director")
 
         st.success(
-            credits["director"]
-        )
-
-        st.markdown("### 👨‍👩‍👧‍👦 Cast")
-
-        cast_cols = st.columns(4)
-
-        for i, actor in enumerate(credits["cast"]):
-
-            with cast_cols[i % 4]:
-
-                st.info(actor)
-
-    companies = movie.get(
-        "production_companies",
-        []
-    )
-
-    if companies:
-
-        st.markdown("### 🏢 Production")
-
-        st.write(
-            ", ".join(
-                company["name"]
-                for company in companies
+            credits.get(
+                "director",
+                "Unknown"
             )
         )
+
+# ==========================================================
+# CAST
+# ==========================================================
+
+if credits:
+
+    st.markdown("### 👨‍👩‍👧‍👦 Cast")
+
+    cast = credits.get("cast", [])
+
+    if cast:
+
+        cols = st.columns(4)
+
+        for index, actor in enumerate(cast):
+
+            with cols[index % 4]:
+
+                # Actor Photo
+                if actor.get("photo"):
+
+                    st.image(
+                        actor["photo"],
+                        width="stretch"
+                    )
+
+                else:
+
+                    st.image(
+                        "https://via.placeholder.com/300x450?text=No+Photo",
+                        width="stretch"
+                    )
+
+                # Actor Name
+                st.markdown(
+                    f"""
+<div style="
+text-align:center;
+font-weight:bold;
+font-size:16px;
+padding-top:8px;
+">
+{actor['name']}
+</div>
+""",
+                    unsafe_allow_html=True
+                )
+
+                # Character
+                character = actor.get("character")
+
+                if character:
+
+                    st.caption(
+                        f"as {character}"
+                    )
+
+# ==========================================================
+# PRODUCTION
+# ==========================================================
+
+companies = movie.get(
+    "production_companies",
+    []
+)
+
+if companies:
+
+    st.markdown("---")
+
+    st.markdown("### 🏢 Production Companies")
+
+    for company in companies:
+
+        st.success(company["name"])
 
 # ==========================================================
 # TRAILER
@@ -245,11 +304,8 @@ st.header("🎥 Official Trailer")
 trailer = get_trailer(movie["id"])
 
 if trailer:
-
     st.video(trailer)
-
 else:
-
     st.info("Trailer not available.")
 
 # ==========================================================
@@ -266,32 +322,83 @@ if similar_movies:
 
     cols = st.columns(5)
 
-    for i, similar in enumerate(similar_movies[:10]):
+    for index, similar in enumerate(similar_movies[:10]):
 
-        with cols[i % 5]:
+        with cols[index % 5]:
 
-            poster = similar.get("poster")
-
-            if poster:
+            if similar.get("poster"):
 
                 st.image(
-                    poster,
+                    similar["poster"],
                     width="stretch"
                 )
 
             st.markdown(
-                f"**{similar['title']}**"
+                f"#### {similar['title']}"
             )
 
-            rating = similar.get("rating")
+            if similar.get("rating") is not None:
 
-            if rating:
+                st.caption(
+                    f"⭐ {similar['rating']}"
+                )
 
-                st.caption(f"⭐ {rating}")
+            if st.button(
+                "View Details",
+                key=f"similar_{similar['id']}"
+            ):
+
+                st.session_state.selected_movie_id = similar["id"]
+                st.rerun()
 
 else:
 
     st.info("No similar movies found.")
+
+# ==========================================================
+# MOVIE INFORMATION
+# ==========================================================
+
+st.markdown("---")
+
+st.header("📊 Movie Information")
+
+col1, col2 = st.columns(2)
+
+with col1:
+
+    st.write(
+        "**Status:**",
+        movie.get("status", "N/A")
+    )
+
+    st.write(
+        "**Release Date:**",
+        movie.get("release_date", "N/A")
+    )
+
+    st.write(
+        "**Original Title:**",
+        movie.get("original_title", "N/A")
+    )
+
+with col2:
+
+    budget = movie.get("budget", 0)
+
+    revenue = movie.get("revenue", 0)
+
+    if budget:
+        st.write(
+            "**Budget:**",
+            f"${budget:,.0f}"
+        )
+
+    if revenue:
+        st.write(
+            "**Revenue:**",
+            f"${revenue:,.0f}"
+        )
 
 # ==========================================================
 # FOOTER
@@ -303,12 +410,20 @@ st.markdown("---")
 
 st.markdown(
     """
-<div style="text-align:center;padding:20px;color:#888;">
+<div style="
+text-align:center;
+padding:20px;
+color:#888;
+">
 
-<h3>🎬 MovieVerse</h3>
+<h2>🎬 MovieVerse</h2>
 
 <p>
 Powered by TMDB API • Streamlit • Python
+</p>
+
+<p style="font-size:14px;">
+Made with ❤️ by Snehal Jadhav
 </p>
 
 </div>
