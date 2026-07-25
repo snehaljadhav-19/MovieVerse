@@ -1,0 +1,243 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+html,
+body,
+[class*="css"]{
+    font-family:'Poppins',sans-serif;
+}
+
+.stApp{
+    background:#0b0b0b;
+    color:#ffffff;
+}
+
+/* Hide Streamlit Header */
+
+header{
+    visibility:hidden;
+}
+
+footer{
+    visibility:hidden;
+}
+
+#MainMenu{
+    visibility:hidden;
+}
+
+/* Sidebar */
+
+section[data-testid="stSidebar"]{
+    background:#111111;
+    border-right:1px solid #222;
+}
+
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3,
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] li{
+    color:white;
+}
+
+/* Hero */
+
+.hero{
+    background:linear-gradient(135deg,#E50914,#8B0000);
+    border-radius:25px;
+    padding:50px;
+    text-align:center;
+    margin-bottom:35px;
+    box-shadow:0 20px 50px rgba(229,9,20,.35);
+}
+
+.hero h1{
+    font-size:55px;
+    font-weight:800;
+    color:white;
+    margin-bottom:10px;
+}
+
+.hero p{
+    color:#eeeeee;
+    font-size:20px;
+}
+
+/* Cards */
+
+div[data-testid="stVerticalBlock"]>div:has(div[data-testid="stImage"]){
+    background:#181818;
+    border-radius:20px;
+    padding:15px;
+    border:1px solid #2c2c2c;
+    transition:.35s;
+}
+
+div[data-testid="stVerticalBlock"]>div:has(div[data-testid="stImage"]):hover{
+    transform:translateY(-8px);
+    border:1px solid #E50914;
+    box-shadow:0 15px 40px rgba(229,9,20,.35);
+}
+
+/* Images */
+
+img{
+    border-radius:15px;
+}
+
+/* Buttons */
+
+.stButton>button{
+    width:100%;
+    background:#E50914;
+    color:white;
+    border:none;
+    border-radius:12px;
+    font-weight:600;
+    font-size:15px;
+    padding:.7rem;
+    transition:.3s;
+}
+
+.stButton>button:hover{
+    background:#ff2d37;
+    transform:scale(1.03);
+    box-shadow:0 8px 25px rgba(229,9,20,.45);
+}
+
+/* Search Box */
+
+.stTextInput>div>div>input{
+    background:#181818;
+    color:white;
+    border:2px solid #333;
+    border-radius:15px;
+}
+
+.stTextInput>div>div>input:focus{
+    border:2px solid #E50914;
+    box-shadow:0 0 15px rgba(229,9,20,.4);
+}
+
+/* Metrics */
+
+div[data-testid="metric-container"]{
+    background:#181818;
+    border-radius:15px;
+    padding:15px;
+    border:1px solid #2b2b2b;
+}
+
+/* Progress */
+
+.stProgress>div>div>div{
+    background:#E50914;
+}
+
+/* Expanders */
+
+.streamlit-expanderHeader{
+    color:white;
+    font-weight:600;
+}
+
+/* Horizontal Line */
+
+hr{
+    border:1px solid #222;
+}
+
+/* Links */
+
+a{
+    color:#ff5a5f;
+}
+
+a:hover{
+    color:white;
+}
+
+/* Footer */
+
+.footer{
+    text-align:center;
+    color:#999;
+    padding:30px;
+}
+
+/* Scrollbar */
+
+::-webkit-scrollbar{
+    width:10px;
+}
+
+::-webkit-scrollbar-track{
+    background:#111;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#E50914;
+    border-radius:10px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+    background:#ff4040;
+}
+
+/* Movie Title */
+
+h4{
+    color:white;
+    font-weight:700;
+}
+
+/* Section Titles */
+
+h1,
+h2,
+h3{
+    color:white;
+}
+
+/* Success */
+
+.stSuccess{
+    border-radius:15px;
+}
+
+/* Warning */
+
+.stWarning{
+    border-radius:15px;
+}
+
+/* Info */
+
+.stInfo{
+    border-radius:15px;
+}
+
+/* Container */
+
+.block-container{
+    padding-top:2rem;
+    padding-bottom:2rem;
+    max-width:1450px;
+}
+
+/* Hover Animation */
+
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(15px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+div[data-testid="stVerticalBlock"]{
+    animation:fadeIn .5s ease;
+}
