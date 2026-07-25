@@ -3,8 +3,6 @@ import ast
 import pickle
 
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-
 from nltk.stem.porter import PorterStemmer
 
 # ==========================================
@@ -34,7 +32,7 @@ movies = movies[
         "cast",
         "crew",
         "vote_average",
-        "release_date"
+        "release_date",
     ]
 ]
 
@@ -81,11 +79,8 @@ def fetch_director(text):
 # ==========================================
 
 movies["genres"] = movies["genres"].apply(convert)
-
 movies["keywords"] = movies["keywords"].apply(convert)
-
 movies["cast"] = movies["cast"].apply(convert3)
-
 movies["crew"] = movies["crew"].apply(fetch_director)
 
 # ==========================================
@@ -137,7 +132,7 @@ new_df = movies[
         "overview",
         "vote_average",
         "release_date",
-        "tags"
+        "tags",
     ]
 ].copy()
 
@@ -145,13 +140,8 @@ new_df = movies[
 # CONVERT TAGS TO STRING
 # ==========================================
 
-new_df["tags"] = new_df["tags"].apply(
-    lambda x: " ".join(x)
-)
-
-new_df["tags"] = new_df["tags"].apply(
-    lambda x: x.lower()
-)
+new_df["tags"] = new_df["tags"].apply(lambda x: " ".join(x))
+new_df["tags"] = new_df["tags"].apply(lambda x: x.lower())
 
 # ==========================================
 # STEMMING
@@ -161,9 +151,7 @@ ps = PorterStemmer()
 
 
 def stem(text):
-    return " ".join(
-        [ps.stem(word) for word in text.split()]
-    )
+    return " ".join([ps.stem(word) for word in text.split()])
 
 
 new_df["tags"] = new_df["tags"].apply(stem)
@@ -174,31 +162,21 @@ new_df["tags"] = new_df["tags"].apply(stem)
 
 cv = CountVectorizer(
     max_features=5000,
-    stop_words="english"
+    stop_words="english",
 )
 
-vectors = cv.fit_transform(
-    new_df["tags"]
-).toarray()
-
-# ==========================================
-# COSINE SIMILARITY
-# ==========================================
-
-similarity = cosine_similarity(vectors)
+cv.fit(new_df["tags"])
 
 # ==========================================
 # SAVE FILES
 # ==========================================
 
-pickle.dump(
-    new_df,
-    open("models/movies.pkl", "wb")
-)
+with open("models/movies.pkl", "wb") as f:
+    pickle.dump(new_df, f)
 
-pickle.dump(
-    similarity,
-    open("models/similarity.pkl", "wb")
-)
+with open("models/vectorizer.pkl", "wb") as f:
+    pickle.dump(cv, f)
 
-print("✅ Model files saved successfully!")
+print("✅ movies.pkl saved")
+print("✅ vectorizer.pkl saved")
+print("🎉 Model generation completed successfully!")
